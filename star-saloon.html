@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Star Saloon — Premium Booking</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0A0A0F;
+  --bg2:#111118;
+  --bg3:#1A1A24;
+  --bg4:#22222F;
+  --gold:#D4A843;
+  --gold2:#F0C96E;
+  --gold-dim:#8A6C2A;
+  --text:#F0EAD6;
+  --muted:#7A7494;
+  --border:rgba(212,168,67,0.15);
+  --border2:rgba(212,168,67,0.3);
+  --success:#2ECC71;
+  --danger:#E74C3C;
+  --info:#3498DB;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
+
+/* ── UTILITIES ── */
+.hidden{display:none!important;}
+.gold{color:var(--gold);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:.75rem 1.8rem;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;transition:all .25s;text-decoration:none;}
+.btn-gold{background:var(--gold);color:#0A0A0F;font-weight:500;}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-sm{padding:.45rem 1rem;font-size:.75rem;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;width:100%;z-index:200;background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;}
+.nav-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold);letter-spacing:.08em;cursor:pointer;}
+.nav-brand span{font-style:italic;}
+.nav-actions{display:flex;gap:.8rem;align-items:center;}
+.nav-admin-btn{font-size:.72rem;padding:.4rem 1rem;letter-spacing:.15em;}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5rem 2rem 3rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 70%,rgba(212,168,67,.07) 0%,transparent 70%);}
+.hero-stars{position:absolute;inset:0;pointer-events:none;}
+.star-dot{position:absolute;border-radius:50%;background:var(--gold);animation:twinkle var(--d,3s) var(--delay,0s) infinite;}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:.7;transform:scale(1.4);}}
+.hero-eyebrow{font-size:.72rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:12px;justify-content:center;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:40px;height:1px;background:var(--gold);opacity:.5;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,9vw,7.5rem);font-weight:600;line-height:1.0;color:var(--text);animation:fadeUp .9s .2s both;}
+.hero h1 em{font-style:italic;color:var(--gold);}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:440px;margin:1.5rem auto 2.5rem;font-weight:300;animation:fadeUp .9s .4s both;}
+.hero-cta{animation:fadeUp .9s .6s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SECTION ── */
+.section{padding:5rem 2.5rem;max-width:1100px;margin:0 auto;}
+.section-label{font-size:.72rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);color:var(--text);margin-bottom:1rem;line-height:1.1;}
+.section-title em{color:var(--gold);font-style:italic;}
+
+/* ── BOOKING MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(5,5,10,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .2s both;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:720px;max-height:90vh;overflow-y:auto;position:relative;animation:slideUp .3s both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.modal-close{position:absolute;top:1.2rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;z-index:10;line-height:1;padding:.3rem;}
+.modal-close:hover{color:var(--gold);}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{display:flex;padding:1.5rem 2rem 0;gap:0;border-bottom:1px solid var(--border);}
+.progress-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;padding-bottom:1rem;}
+.progress-step::before{content:'';position:absolute;top:14px;left:50%;width:100%;height:1px;background:var(--border2);}
+.progress-step:last-child::before{display:none;}
+.step-num{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.72rem;color:var(--muted);background:var(--bg2);position:relative;z-index:1;transition:all .3s;}
+.step-lbl{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center;transition:color .3s;}
+.progress-step.active .step-num{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+.progress-step.active .step-lbl{color:var(--gold);}
+.progress-step.done .step-num{background:var(--gold-dim);color:var(--gold2);border-color:var(--gold-dim);}
+.progress-step.done .step-lbl{color:var(--muted);}
+
+/* ── STEP CONTENT ── */
+.step-content{padding:2rem;}
+.step-heading{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--text);margin-bottom:.4rem;}
+.step-sub{font-size:.88rem;color:var(--muted);margin-bottom:1.8rem;}
+
+/* ── SERVICE SELECTION ── */
+.category-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.cat-tab{padding:.5rem 1.2rem;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.cat-tab.active,.cat-tab:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,.06);}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.8rem;}
+.service-card{border:1px solid var(--border);padding:1.2rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.service-card::after{content:'';position:absolute;bottom:0;left:0;right:100%;height:2px;background:var(--gold);transition:right .3s;}
+.service-card:hover::after,.service-card.selected::after{right:0;}
+.service-card.selected{border-color:var(--gold);background:rgba(212,168,67,.05);}
+.service-card:hover{border-color:var(--border2);}
+.svc-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--text);margin-bottom:.3rem;}
+.svc-meta{font-size:.78rem;color:var(--muted);}
+.svc-price{font-size:1.1rem;color:var(--gold);margin-top:.6rem;font-weight:500;}
+.svc-check{position:absolute;top:.7rem;right:.7rem;width:18px;height:18px;border-radius:50%;background:var(--gold);display:none;align-items:center;justify-content:center;font-size:.65rem;color:var(--bg);}
+.service-card.selected .svc-check{display:flex;}
+
+/* ── STYLIST SELECTION ── */
+.stylists-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;}
+.stylist-card{border:1px solid var(--border);padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:all .25s;}
+.stylist-card:hover{border-color:var(--border2);}
+.stylist-card.selected{border-color:var(--gold);background:rgba(212,168,67,.05);}
+.stylist-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);margin:0 auto .8rem;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold);}
+.stylist-name{font-weight:500;font-size:.9rem;color:var(--text);}
+.stylist-role{font-size:.75rem;color:var(--muted);margin-top:.2rem;}
+.stylist-badge{display:inline-block;padding:.15rem .5rem;background:rgba(212,168,67,.12);color:var(--gold);font-size:.65rem;letter-spacing:.08em;margin-top:.5rem;text-transform:uppercase;}
+
+/* ── CALENDAR ── */
+.calendar-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.calendar{background:var(--bg3);padding:1.2rem;border:1px solid var(--border);}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.cal-nav{background:none;border:1px solid var(--border);color:var(--text);width:30px;height:30px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:border-color .2s;}
+.cal-nav:hover{border-color:var(--gold);color:var(--gold);}
+.cal-month{font-family:'Cormorant Garamond',serif;font-size:1.1rem;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-day-label{text-align:center;font-size:.65rem;color:var(--muted);padding:.3rem 0;letter-spacing:.05em;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:.8rem;cursor:pointer;transition:all .2s;border-radius:2px;}
+.cal-day:hover:not(.disabled):not(.empty){background:rgba(212,168,67,.15);color:var(--gold);}
+.cal-day.selected{background:var(--gold);color:var(--bg);font-weight:500;}
+.cal-day.today{color:var(--gold);font-weight:500;}
+.cal-day.disabled{color:var(--bg4);cursor:not-allowed;}
+.cal-day.empty{cursor:default;}
+.time-slots h4{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
+.slot{padding:.45rem;text-align:center;border:1px solid var(--border);font-size:.78rem;cursor:pointer;transition:all .2s;color:var(--muted);}
+.slot:hover:not(.taken){border-color:var(--gold);color:var(--gold);}
+.slot.selected{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+.slot.taken{background:var(--bg4);color:var(--bg4);cursor:not-allowed;border-color:transparent;}
+
+/* ── CLIENT FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-row{display:flex;flex-direction:column;gap:.4rem;}
+.form-row.full{grid-column:1/-1;}
+.form-row label{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.form-row input,.form-row select,.form-row textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--gold);}
+.form-row textarea{height:80px;resize:vertical;}
+
+/* ── SUMMARY ── */
+.summary-card{background:var(--bg3);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.2rem;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border);}
+.summary-row:last-child{border-bottom:none;}
+.summary-label{font-size:.82rem;color:var(--muted);}
+.summary-val{font-size:.9rem;color:var(--text);}
+.summary-total{font-size:1.3rem;color:var(--gold);font-family:'Cormorant Garamond',serif;}
+.payment-options{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1.2rem 0;}
+.pay-option{border:1px solid var(--border);padding:1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.8rem;}
+.pay-option:hover,.pay-option.selected{border-color:var(--gold);background:rgba(212,168,67,.05);}
+.pay-icon{width:36px;height:36px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.pay-name{font-weight:500;font-size:.9rem;}
+.pay-sub{font-size:.72rem;color:var(--muted);}
+.razorpay-btn{background:linear-gradient(135deg,#072654,#528FF0);color:#fff;border:none;padding:.8rem;width:100%;font-family:'DM Sans',sans-serif;font-size:.85rem;letter-spacing:.1em;cursor:pointer;margin-top:.5rem;transition:opacity .2s;}
+.razorpay-btn:hover{opacity:.88;}
+.stripe-btn{background:#635BFF;color:#fff;border:none;padding:.8rem;width:100%;font-family:'DM Sans',sans-serif;font-size:.85rem;letter-spacing:.1em;cursor:pointer;margin-top:.5rem;transition:opacity .2s;}
+
+/* ── SUCCESS ── */
+.success-screen{text-align:center;padding:3rem 2rem;}
+.success-icon{width:80px;height:80px;border-radius:50%;background:rgba(46,204,113,.12);border:2px solid var(--success);margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--success);}
+.booking-ref{background:var(--bg3);border:1px solid var(--border);padding:.8rem 1.5rem;display:inline-block;font-family:'DM Sans',monospace;font-size:1.1rem;color:var(--gold);letter-spacing:.1em;margin:1rem 0;}
+.email-preview{background:var(--bg3);border:1px solid var(--border);padding:1.5rem;text-align:left;margin:1.5rem 0;font-size:.85rem;}
+.email-preview h4{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+
+/* ── STEP NAV ── */
+.step-nav{display:flex;justify-content:space-between;align-items:center;padding:1.2rem 2rem;border-top:1px solid var(--border);background:var(--bg2);}
+
+/* ── ADMIN ── */
+.admin-overlay{position:fixed;inset:0;z-index:600;background:var(--bg);overflow-y:auto;}
+.admin-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.admin-brand{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);}
+.admin-body{max-width:1100px;margin:0 auto;padding:2rem;}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:1.2rem;text-align:center;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold);}
+.stat-lbl{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+.bookings-table{width:100%;border-collapse:collapse;}
+.bookings-table th{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:.7rem 1rem;border-bottom:1px solid var(--border);text-align:left;background:var(--bg2);}
+.bookings-table td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.85rem;vertical-align:middle;}
+.bookings-table tr:hover td{background:rgba(212,168,67,.02);}
+.status-badge{padding:.25rem .7rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;display:inline-block;}
+.status-pending{background:rgba(243,156,18,.15);color:#F39C12;}
+.status-confirmed{background:rgba(46,204,113,.12);color:var(--success);}
+.status-cancelled{background:rgba(231,76,60,.12);color:var(--danger);}
+.status-rescheduled{background:rgba(52,152,219,.12);color:var(--info);}
+.action-btns{display:flex;gap:.4rem;flex-wrap:wrap;}
+.filter-bar{display:flex;gap:.8rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;}
+.filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.5rem .8rem;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;cursor:pointer;}
+
+/* ── PASSWORD ── */
+.password-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.password-box{background:var(--bg2);border:1px solid var(--border);padding:2.5rem;width:100%;max-width:380px;text-align:center;}
+.pw-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold);margin-bottom:.4rem;}
+.pw-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.8rem;}
+.pw-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.8rem 1rem;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;margin-bottom:1rem;text-align:center;letter-spacing:.2em;}
+.pw-input:focus{border-color:var(--gold);}
+.pw-error{color:var(--danger);font-size:.8rem;margin-top:.5rem;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:900;background:var(--bg3);border:1px solid var(--border2);padding:1rem 1.5rem;display:flex;align-items:center;gap:.8rem;font-size:.88rem;animation:slideInRight .3s both;max-width:320px;}
+@keyframes slideInRight{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.toast.success{border-color:rgba(46,204,113,.4);}
+.toast.error{border-color:rgba(231,76,60,.4);}
+
+/* ── RESCHEDULE MODAL ── */
+.reschedule-modal{position:fixed;inset:0;z-index:700;background:rgba(5,5,10,.85);display:flex;align-items:center;justify-content:center;padding:1rem;}
+.reschedule-box{background:var(--bg2);border:1px solid var(--border);padding:2rem;width:100%;max-width:400px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:680px){
+  nav{padding:.8rem 1.2rem;}
+  .nav-brand{font-size:1.2rem;}
+  .calendar-wrap{grid-template-columns:1fr;}
+  .form-grid{grid-template-columns:1fr;}
+  .payment-options{grid-template-columns:1fr;}
+  .admin-stats{grid-template-columns:repeat(2,1fr);}
+  .bookings-table{font-size:.75rem;}
+  .bookings-table th,.bookings-table td{padding:.5rem .6rem;}
+  .action-btns{gap:.3rem;}
+  .btn-sm{padding:.35rem .6rem;font-size:.68rem;}
+  .progress-bar{padding:1rem 1rem 0;}
+  .step-lbl{font-size:.58rem;}
+  .step-content{padding:1.2rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ░░ NAV ░░ -->
+<nav>
+  <div class="nav-brand" onclick="showHome()">★ <span>Star</span> Saloon</div>
+  <div class="nav-actions">
+    <button class="btn btn-outline nav-admin-btn" onclick="showAdminLogin()">Admin</button>
+    <button class="btn btn-gold" onclick="openBooking()">Book Now</button>
+  </div>
+</nav>
+
+<!-- ░░ HERO ░░ -->
+<div id="heroSection">
+  <section class="hero">
+    <div class="hero-stars" id="starsContainer"></div>
+    <p class="hero-eyebrow">Premium Salon Experience</p>
+    <h1>Look Your<br><em>Best Self</em></h1>
+    <p class="hero-sub">Expert styling, premium grooming, and unmatched care — all under one roof in Chennai.</p>
+    <div class="hero-cta">
+      <button class="btn btn-gold" style="font-size:1rem;padding:1rem 2.5rem;" onclick="openBooking()">Book Appointment ›</button>
+    </div>
+  </section>
+
+  <!-- ░░ SERVICES PRICING TABLE ░░ -->
+  <div id="services" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 0;">
+    <div style="max-width:1100px;margin:0 auto;padding:0 2.5rem;">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;">
+        <div>
+          <p class="section-label">What We Offer</p>
+          <h2 class="section-title" style="margin-bottom:.5rem;">Services &amp; <em>Pricing</em></h2>
+          <p style="color:var(--muted);font-size:.92rem;font-weight:300;max-width:480px;">Every service is performed by certified professionals using premium products.</p>
+        </div>
+        <button class="btn btn-gold" style="padding:.75rem 1.8rem;font-size:.85rem;" onclick="openBooking()">Book an Appointment</button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:0;" id="pricingTabs">
+        <button class="ptab2 active" onclick="filterPricing2('all',this)">All Services</button>
+        <button class="ptab2" onclick="filterPricing2('hair',this)">✂ Hair</button>
+        <button class="ptab2" onclick="filterPricing2('skin',this)">✨ Skin</button>
+        <button class="ptab2" onclick="filterPricing2('grooming',this)">🪒 Grooming</button>
+        <button class="ptab2" onclick="filterPricing2('nail',this)">💅 Nail &amp; Wax</button>
+      </div>
+
+      <!-- Table wrapper -->
+      <div style="margin-top:0;border:1px solid var(--border2);overflow:hidden;">
+
+        <!-- Table header -->
+        <div class="pt2-head">
+          <div class="pt2-col-svc">Service</div>
+          <div class="pt2-col-dur">Duration</div>
+          <div class="pt2-col-price">Price &amp; Book</div>
+        </div>
+
+        <!-- Rows injected here -->
+        <div id="pricingRows2"></div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div style="margin-top:1.2rem;display:flex;align-items:flex-start;gap:.8rem;padding:1rem 1.3rem;background:rgba(212,168,67,.04);border:1px solid rgba(212,168,67,.12);">
+        <span style="color:var(--gold);font-size:.95rem;flex-shrink:0;margin-top:.05rem;">ⓘ</span>
+        <p style="font-size:.8rem;color:var(--muted);line-height:1.75;margin:0;">
+          <strong style="color:var(--gold-dim);font-weight:500;">Prices may vary based on hair length and stylist expertise. Taxes extra.</strong>
+          All prices listed are starting prices and will be confirmed at the time of booking. For packages or group bookings, please call us at <strong style="color:var(--text);">+91 98400 00001</strong>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <style>
+  /* ── Tabs ── */
+  .ptab2{background:transparent;border:1px solid transparent;border-bottom:none;color:var(--muted);padding:.6rem 1.3rem;font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;position:relative;top:1px;}
+  .ptab2:hover{color:var(--gold);}
+  .ptab2.active{border-color:var(--border2);border-bottom-color:var(--bg2);color:var(--gold);background:var(--bg2);}
+
+  /* ── Table head ── */
+  .pt2-head{display:grid;grid-template-columns:1fr 120px 220px;background:rgba(212,168,67,.07);border-bottom:1px solid var(--border2);padding:.8rem 1.4rem;gap:1rem;}
+  .pt2-head>div{font-size:.67rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);font-weight:500;}
+  .pt2-col-price{text-align:right;}
+
+  /* ── Row ── */
+  .pt2-row{display:grid;grid-template-columns:1fr 120px 220px;align-items:center;padding:1rem 1.4rem;border-bottom:1px solid var(--border);gap:1rem;transition:background .18s;}
+  .pt2-row:last-child{border-bottom:none;}
+  .pt2-row:hover{background:rgba(212,168,67,.025);}
+  .pt2-row:hover .pt2-book{opacity:1;transform:translateY(0);}
+
+  /* ── Row cells ── */
+  .pt2-svc-name{font-weight:500;font-size:.93rem;color:var(--text);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+  .pt2-cat{display:inline-block;padding:.12rem .5rem;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border2);color:var(--gold-dim);}
+  .pt2-svc-desc{font-size:.77rem;color:var(--muted);margin-top:.18rem;}
+  .pt2-dur{font-size:.84rem;color:var(--muted);}
+  .pt2-price-wrap{display:flex;align-items:center;justify-content:flex-end;gap:.9rem;}
+  .pt2-price{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--gold);white-space:nowrap;line-height:1;}
+  .pt2-book{background:var(--gold);color:#0A0A0F;border:none;padding:.44rem 1.05rem;font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;white-space:nowrap;font-weight:500;transition:all .22s;opacity:.85;transform:translateY(1px);}
+  .pt2-book:hover{background:var(--gold2);}
+
+  /* ── Category group header ── */
+  .pt2-group{padding:.55rem 1.4rem;background:rgba(212,168,67,.05);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem;}
+  .pt2-group-icon{font-size:.95rem;}
+  .pt2-group-name{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:500;}
+  .pt2-group-count{font-size:.68rem;color:var(--muted);}
+
+  /* ── MOBILE: card stack ── */
+  @media(max-width:640px){
+    .pt2-head{display:none;}
+    .ptab2{font-size:.68rem;padding:.5rem .9rem;}
+    .pt2-row{grid-template-columns:1fr;gap:.4rem;padding:.95rem 1rem;background:var(--bg3);}
+    .pt2-row:hover{background:var(--bg3);}
+    .pt2-dur::before{content:'Duration: ';font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-dim);}
+    .pt2-price-wrap{justify-content:space-between;margin-top:.4rem;padding-top:.6rem;border-top:1px solid var(--border);}
+    .pt2-book{opacity:1;transform:none;flex-shrink:0;}
+    .pt2-group{padding:.45rem .9rem;}
+  }
+  </style>
+
+  <script>
+  const PRICING_DATA2=[
+    {cat:'hair',icon:'✂',name:'Classic Haircut',desc:'Precision scissor & clipper cut, styled to your face shape',duration:'45 min',price:'₹350'},
+    {cat:'hair',icon:'✂',name:'Men\'s Haircut',desc:'Classic or modern cut with clean finish',duration:'30 min',price:'₹250'},
+    {cat:'hair',icon:'✂',name:'Hair Styling',desc:'Blowdry, set & professional finish',duration:'60 min',price:'₹450'},
+    {cat:'hair',icon:'✂',name:'Hair Colour',desc:'Full colour with premium toner & shine treatment',duration:'2 hrs',price:'₹1,200'},
+    {cat:'hair',icon:'✂',name:'Highlights / Balayage',desc:'Partial or full highlights, hand-painted',duration:'2.5 hrs',price:'₹1,800'},
+    {cat:'hair',icon:'✂',name:'Keratin Treatment',desc:'Frizz-free smoothing with deep shine',duration:'3 hrs',price:'₹2,500'},
+    {cat:'hair',icon:'✂',name:'Hair Spa',desc:'Deep conditioning & revitalising scalp treatment',duration:'60 min',price:'₹700'},
+    {cat:'skin',icon:'✨',name:'Classic Facial',desc:'Deep cleanse, steam, extraction & massage',duration:'60 min',price:'₹600'},
+    {cat:'skin',icon:'✨',name:'Gold Facial',desc:'Luxury brightening & anti-aging treatment',duration:'75 min',price:'₹1,100'},
+    {cat:'skin',icon:'✨',name:'Bleach & Clean-up',desc:'Even tone, instant glow & pore cleansing',duration:'45 min',price:'₹450'},
+    {cat:'skin',icon:'✨',name:'De-tan Treatment',desc:'Full face & neck tanning reversal',duration:'45 min',price:'₹550'},
+    {cat:'grooming',icon:'🪒',name:'Hot Towel Shave',desc:'Straight-razor with hot towel & pre-shave oil',duration:'30 min',price:'₹300'},
+    {cat:'grooming',icon:'🪒',name:'Beard Sculpting',desc:'Expert shape, edge, oil & conditioning',duration:'30 min',price:'₹250'},
+    {cat:'grooming',icon:'🪒',name:'Head Massage',desc:'Warm oil deep-pressure relaxation massage',duration:'45 min',price:'₹400'},
+    {cat:'nail',icon:'💅',name:'Manicure',desc:'Shape, buff, cuticle care & polish',duration:'45 min',price:'₹350'},
+    {cat:'nail',icon:'💅',name:'Pedicure',desc:'Soak, scrub, massage & polish',duration:'60 min',price:'₹450'},
+    {cat:'nail',icon:'💅',name:'Gel Nail Extension',desc:'Full set with long-lasting gel finish',duration:'90 min',price:'₹1,200'},
+    {cat:'nail',icon:'💅',name:'Full Body Waxing',desc:'Arms, legs & underarm waxing',duration:'60 min',price:'₹700'},
+  ];
+  const CAT_META={hair:{label:'Hair Services',icon:'✂'},skin:{label:'Skin Services',icon:'✨'},grooming:{label:'Grooming',icon:'🪒'},nail:{label:'Nail & Wax',icon:'💅'}};
+
+  function renderPricing2(filter){
+    const container=document.getElementById('pricingRows2');
+    const list=filter==='all'?PRICING_DATA2:PRICING_DATA2.filter(r=>r.cat===filter);
+    if(filter==='all'){
+      // Group by category
+      const cats=['hair','skin','grooming','nail'];
+      let html='';
+      cats.forEach(cat=>{
+        const rows=list.filter(r=>r.cat===cat);
+        if(!rows.length) return;
+        const m=CAT_META[cat];
+        html+=`<div class="pt2-group"><span class="pt2-group-icon">${m.icon}</span><span class="pt2-group-name">${m.label}</span><span class="pt2-group-count">(${rows.length} services)</span></div>`;
+        html+=rows.map(r=>rowHtml(r)).join('');
+      });
+      container.innerHTML=html;
+    } else {
+      container.innerHTML=list.map(r=>rowHtml(r)).join('');
+    }
+  }
+  function rowHtml(r){
+    const safeName=r.name.replace(/'/g,"\\'");
+    return `<div class="pt2-row">
+      <div>
+        <div class="pt2-svc-name">${r.name}</div>
+        <div class="pt2-svc-desc">${r.desc}</div>
+      </div>
+      <div class="pt2-dur">${r.duration}</div>
+      <div class="pt2-price-wrap">
+        <span class="pt2-price">${r.price}</span>
+        <button class="pt2-book" onclick="openBookingFor2('${safeName}')">Book Now</button>
+      </div>
+    </div>`;
+  }
+  function filterPricing2(cat,btn){
+    document.querySelectorAll('.ptab2').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPricing2(cat);
+  }
+  function openBookingFor2(svcName){
+    openBooking();
+    setTimeout(()=>{
+      const match=SERVICES.find(s=>s.name===svcName);
+      if(match){state.service=match;renderServices('all');renderStep(2);}
+    },200);
+  }
+  renderPricing2('all');
+  </script>
+
+  <!-- CTA Banner -->
+  <div style="background:var(--bg);padding:4rem 2rem;text-align:center;border-bottom:1px solid var(--border);">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,4vw,2.5rem);color:var(--text);margin-bottom:1.2rem;">Ready for a <em style="color:var(--gold);">transformation?</em></p>
+    <button class="btn btn-gold" style="font-size:.9rem;padding:.9rem 2.2rem;" onclick="openBooking()">Book Your Session Now</button>
+  </div>
+
+  <footer style="background:var(--bg2);border-top:1px solid var(--border);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+    <span style="font-family:'Cormorant Garamond',serif;color:var(--gold);font-size:1.1rem;">★ Star Saloon</span>
+    <span style="font-size:.8rem;color:var(--muted);">Chennai · Open Mon–Sat 9AM–9PM · +91 98400 00001</span>
+    <span style="font-size:.75rem;color:var(--muted);">© 2025 Star Saloon</span>
+  </footer>
+</div>
+
+<!-- ░░ BOOKING MODAL ░░ -->
+<div class="modal-overlay hidden" id="bookingModal">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeBooking()">✕</button>
+
+    <!-- Progress -->
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-step active" id="ps1"><div class="step-num">1</div><div class="step-lbl">Service</div></div>
+      <div class="progress-step" id="ps2"><div class="step-num">2</div><div class="step-lbl">Stylist</div></div>
+      <div class="progress-step" id="ps3"><div class="step-num">3</div><div class="step-lbl">Date & Time</div></div>
+      <div class="progress-step" id="ps4"><div class="step-num">4</div><div class="step-lbl">Details</div></div>
+      <div class="progress-step" id="ps5"><div class="step-num">5</div><div class="step-lbl">Summary</div></div>
+    </div>
+
+    <!-- Step 1: Service -->
+    <div class="step-content" id="step1">
+      <h2 class="step-heading">Choose a Service</h2>
+      <p class="step-sub">Select the category and pick your service</p>
+      <div class="category-tabs">
+        <button class="cat-tab active" onclick="filterCategory('all',this)">All</button>
+        <button class="cat-tab" onclick="filterCategory('hair',this)">Hair</button>
+        <button class="cat-tab" onclick="filterCategory('skin',this)">Skin</button>
+        <button class="cat-tab" onclick="filterCategory('grooming',this)">Grooming</button>
+        <button class="cat-tab" onclick="filterCategory('nail',this)">Nail & Wax</button>
+      </div>
+      <div class="services-grid" id="servicesGrid"></div>
+    </div>
+
+    <!-- Step 2: Stylist -->
+    <div class="step-content hidden" id="step2">
+      <h2 class="step-heading">Choose Your Stylist</h2>
+      <p class="step-sub">Each expert is carefully trained for your service</p>
+      <div class="stylists-grid" id="stylistsGrid"></div>
+    </div>
+
+    <!-- Step 3: Date & Time -->
+    <div class="step-content hidden" id="step3">
+      <h2 class="step-heading">Pick Date & Time</h2>
+      <p class="step-sub">Choose an available slot on the calendar</p>
+      <div class="calendar-wrap">
+        <div>
+          <div class="calendar">
+            <div class="cal-header">
+              <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+              <span class="cal-month" id="calMonth"></span>
+              <button class="cal-nav" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+        </div>
+        <div class="time-slots">
+          <h4>Available Times</h4>
+          <div class="slots-grid" id="slotsGrid"></div>
+          <p id="noSlotMsg" style="font-size:.82rem;color:var(--muted);margin-top:1rem;display:none;">Select a date to see available times.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Client Details -->
+    <div class="step-content hidden" id="step4">
+      <h2 class="step-heading">Your Details</h2>
+      <p class="step-sub">We'll send a confirmation to your contact</p>
+      <div class="form-grid">
+        <div class="form-row"><label>Full Name *</label><input type="text" id="clientName" placeholder="e.g. Priya Sharma"/></div>
+        <div class="form-row"><label>Phone *</label><input type="tel" id="clientPhone" placeholder="+91 98XXX XXXXX"/></div>
+        <div class="form-row full"><label>Email *</label><input type="email" id="clientEmail" placeholder="you@email.com"/></div>
+        <div class="form-row full"><label>Special Notes</label><textarea id="clientNotes" placeholder="Any special requests, allergies, or preferences..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- Step 5: Summary -->
+    <div class="step-content hidden" id="step5">
+      <h2 class="step-heading">Booking Summary</h2>
+      <p class="step-sub">Review your appointment before confirming</p>
+      <div class="summary-card" id="summaryCard"></div>
+      <p style="font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;">Payment Method</p>
+      <div class="payment-options">
+        <div class="pay-option selected" id="payAtSalon" onclick="selectPayment('salon')">
+          <div class="pay-icon">🏠</div>
+          <div><div class="pay-name">Pay at Salon</div><div class="pay-sub">Cash or card on arrival</div></div>
+        </div>
+        <div class="pay-option" id="payOnline" onclick="selectPayment('online')">
+          <div class="pay-icon">💳</div>
+          <div><div class="pay-name">Pay Online</div><div class="pay-sub">Razorpay / Stripe</div></div>
+        </div>
+      </div>
+      <div id="onlinePayBtns" style="display:none;">
+        <button class="razorpay-btn" onclick="payWithRazorpay()">Pay with Razorpay</button>
+        <button class="stripe-btn" onclick="payWithStripe()">Pay with Stripe</button>
+      </div>
+      <div id="confirmBtn" style="margin-top:1rem;">
+        <button class="btn btn-gold" style="width:100%;padding:1rem;font-size:.9rem;" onclick="confirmBooking()">Confirm Booking →</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="step-content hidden" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">✓</div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--text);margin-bottom:.5rem;">Booking Confirmed!</h2>
+        <p style="color:var(--muted);font-size:.9rem;">Your appointment has been booked successfully.</p>
+        <div class="booking-ref" id="bookingRef">SS-000000</div>
+        <div class="email-preview" id="emailPreview"></div>
+        <button class="btn btn-gold" onclick="closeBooking()">Done →</button>
+      </div>
+    </div>
+
+    <!-- Step Nav -->
+    <div class="step-nav" id="stepNav">
+      <button class="btn btn-outline" id="prevBtn" onclick="prevStep()" style="display:none;">← Back</button>
+      <div style="font-size:.78rem;color:var(--muted);" id="stepIndicator">Step 1 of 5</div>
+      <button class="btn btn-gold" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ ADMIN PASSWORD ░░ -->
+<div class="admin-overlay hidden" id="adminOverlay">
+  <div id="adminLogin" class="password-screen">
+    <div class="password-box">
+      <div class="pw-title">Admin Access</div>
+      <p class="pw-sub">Enter the admin password to continue</p>
+      <input class="pw-input" type="password" id="adminPw" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdmin()"/>
+      <button class="btn btn-gold" style="width:100%;" onclick="checkAdmin()">Enter Dashboard</button>
+      <p class="pw-error hidden" id="pwError">Incorrect password. Try again.</p>
+      <button class="btn btn-outline" style="width:100%;margin-top:.8rem;" onclick="hideAdmin()">Cancel</button>
+    </div>
+  </div>
+  <div id="adminDashboard" class="hidden">
+    <div class="admin-nav">
+      <div class="admin-brand">★ Star Saloon — Admin Dashboard</div>
+      <div style="display:flex;gap:.8rem;align-items:center;">
+        <span style="font-size:.78rem;color:var(--muted);" id="adminDate"></span>
+        <button class="btn btn-outline btn-sm" onclick="hideAdmin()">Exit</button>
+      </div>
+    </div>
+    <div class="admin-body">
+      <div class="admin-stats" id="adminStats"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.8rem;">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);">All Bookings</h3>
+        <div class="filter-bar">
+          <select class="filter-select" id="statusFilter" onchange="renderAdmin()">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="rescheduled">Rescheduled</option>
+          </select>
+          <select class="filter-select" id="dateFilter" onchange="renderAdmin()">
+            <option value="all">All Dates</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Ref #</th><th>Client</th><th>Service</th><th>Stylist</th><th>Date & Time</th><th>Payment</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsBody"></tbody>
+        </table>
+      </div>
+      <p id="noBookingsMsg" style="text-align:center;color:var(--muted);padding:3rem;display:none;">No bookings found.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ░░ RESCHEDULE MODAL ░░ -->
+<div class="reschedule-modal hidden" id="rescheduleModal">
+  <div class="reschedule-box">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin-bottom:1rem;">Reschedule Booking</h3>
+    <input type="hidden" id="rescheduleRef"/>
+    <div class="form-row" style="margin-bottom:1rem;">
+      <label>New Date</label>
+      <input type="date" id="newDate" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem;font-family:'DM Sans',sans-serif;width:100%;outline:none;"/>
+    </div>
+    <div class="form-row" style="margin-bottom:1.2rem;">
+      <label>New Time</label>
+      <select id="newTime" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem;font-family:'DM Sans',sans-serif;width:100%;outline:none;">
+        <option>09:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+        <option>12:00 PM</option><option>01:00 PM</option><option>02:00 PM</option>
+        <option>03:00 PM</option><option>04:00 PM</option><option>05:00 PM</option>
+        <option>06:00 PM</option><option>07:00 PM</option><option>08:00 PM</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:.8rem;">
+      <button class="btn btn-gold" style="flex:1;" onclick="applyReschedule()">Confirm</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('rescheduleModal').classList.add('hidden')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const SERVICES = [
+  {id:'s1',cat:'hair',name:'Classic Haircut',desc:'Precision scissor cut',price:350,duration:45},
+  {id:'s2',cat:'hair',name:'Hair Styling',desc:'Blowdry + styling',price:450,duration:60},
+  {id:'s3',cat:'hair',name:'Hair Colour',desc:'Full colour + toner',price:1200,duration:120},
+  {id:'s4',cat:'hair',name:'Keratin Treatment',desc:'Smoothing + shine',price:2500,duration:180},
+  {id:'s5',cat:'skin',name:'Classic Facial',desc:'Deep cleanse + massage',price:600,duration:60},
+  {id:'s6',cat:'skin',name:'Gold Facial',desc:'Luxury brightening',price:1100,duration:75},
+  {id:'s7',cat:'skin',name:'Bleach & Clean-up',desc:'Even tone + glow',price:450,duration:45},
+  {id:'s8',cat:'grooming',name:'Hot Towel Shave',desc:'Straight-razor finish',price:300,duration:30},
+  {id:'s9',cat:'grooming',name:'Beard Sculpting',desc:'Shape + edge + oil',price:250,duration:30},
+  {id:'s10',cat:'grooming',name:'Head Massage',desc:'Warm oil + pressure',price:400,duration:45},
+  {id:'s11',cat:'nail',name:'Manicure',desc:'Shape, buff & polish',price:350,duration:45},
+  {id:'s12',cat:'nail',name:'Pedicure',desc:'Soak, scrub & polish',price:450,duration:60},
+  {id:'s13',cat:'nail',name:'Full Waxing',desc:'Arms, legs & underarm',price:700,duration:60},
+];
+
+const STYLISTS = [
+  {id:'st1',name:'Ananya Raj',role:'Senior Stylist',speciality:'Hair & Colour',cats:['hair','nail']},
+  {id:'st2',name:'Karthik M',role:'Master Barber',speciality:'Grooming & Shave',cats:['grooming','hair']},
+  {id:'st3',name:'Divya S',role:'Skin Expert',speciality:'Facials & Skin',cats:['skin','nail']},
+  {id:'st4',name:'Riya Nair',role:'Nail Technician',speciality:'Nail Art & Wax',cats:['nail','skin']},
+  {id:'st5',name:'Vikram P',role:'Hair Artist',speciality:'Cuts & Keratin',cats:['hair']},
+  {id:'st6',name:'Preethi K',role:'Beauty Expert',speciality:'Skin & Grooming',cats:['skin','grooming']},
+];
+
+const TIMES = ['09:00 AM','09:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM','01:00 PM','02:00 PM','02:30 PM','03:00 PM','03:30 PM','04:00 PM','04:30 PM','05:00 PM','05:30 PM','06:00 PM','06:30 PM','07:00 PM','07:30 PM','08:00 PM'];
+const TAKEN = ['10:00 AM','12:00 PM','03:00 PM','05:00 PM'];
+const ADMIN_PASSWORD = 'star2025';
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let state = {step:1,service:null,stylist:null,date:null,time:null,name:'',phone:'',email:'',notes:'',payment:'salon',ref:''};
+let bookings = JSON.parse(localStorage.getItem('starBookings')||'[]');
+let calDate = new Date();
+
+// ═══════════════════════════════════════════════
+//  STARS ANIMATION
+// ═══════════════════════════════════════════════
+(function(){
+  const c=document.getElementById('starsContainer');
+  for(let i=0;i<60;i++){
+    const d=document.createElement('div');
+    const s=Math.random()*3+1;
+    d.className='star-dot';
+    d.style.cssText=`width:${s}px;height:${s}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s;`;
+    c.appendChild(d);
+  }
+})();
+
+// ═══════════════════════════════════════════════
+//  BOOKING FLOW
+// ═══════════════════════════════════════════════
+function openBooking(){
+  state={step:1,service:null,stylist:null,date:null,time:null,name:'',phone:'',email:'',notes:'',payment:'salon',ref:''};
+  document.getElementById('bookingModal').classList.remove('hidden');
+  renderStep(1);
+}
+function closeBooking(){
+  document.getElementById('bookingModal').classList.add('hidden');
+}
+function renderStep(n){
+  state.step=n;
+  [1,2,3,4,5].forEach(i=>{
+    document.getElementById('step'+i).classList.add('hidden');
+  });
+  document.getElementById('stepSuccess').classList.add('hidden');
+  document.getElementById('step'+n).classList.remove('hidden');
+  document.getElementById('progressBar').classList.remove('hidden');
+  document.getElementById('stepNav').classList.remove('hidden');
+  // Progress
+  ['ps1','ps2','ps3','ps4','ps5'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.remove('active','done');
+    if(i+1<n) el.classList.add('done');
+    if(i+1===n) el.classList.add('active');
+  });
+  document.getElementById('stepIndicator').textContent=`Step ${n} of 5`;
+  document.getElementById('prevBtn').style.display=n>1?'':'none';
+  document.getElementById('nextBtn').textContent=n<5?'Next →':'Review';
+  document.getElementById('nextBtn').style.display='';
+  if(n===5) renderSummary();
+  if(n===1) renderServices();
+  if(n===2) renderStylists();
+  if(n===3) renderCalendar();
+}
+function nextStep(){
+  if(!validateStep()) return;
+  if(state.step<5) renderStep(state.step+1);
+}
+function prevStep(){
+  if(state.step>1) renderStep(state.step-1);
+}
+function validateStep(){
+  if(state.step===1 && !state.service){showToast('Please select a service','error');return false;}
+  if(state.step===2 && !state.stylist){showToast('Please choose a stylist','error');return false;}
+  if(state.step===3){
+    if(!state.date){showToast('Please pick a date','error');return false;}
+    if(!state.time){showToast('Please pick a time slot','error');return false;}
+  }
+  if(state.step===4){
+    if(!document.getElementById('clientName').value.trim()){showToast('Please enter your name','error');return false;}
+    if(!document.getElementById('clientPhone').value.trim()){showToast('Please enter your phone','error');return false;}
+    if(!document.getElementById('clientEmail').value.trim()){showToast('Please enter your email','error');return false;}
+    state.name=document.getElementById('clientName').value.trim();
+    state.phone=document.getElementById('clientPhone').value.trim();
+    state.email=document.getElementById('clientEmail').value.trim();
+    state.notes=document.getElementById('clientNotes').value.trim();
+  }
+  return true;
+}
+
+// ── Services ──
+function renderServices(cat='all'){
+  const g=document.getElementById('servicesGrid');
+  const list=cat==='all'?SERVICES:SERVICES.filter(s=>s.cat===cat);
+  g.innerHTML=list.map(s=>`
+    <div class="service-card${state.service&&state.service.id===s.id?' selected':''}" onclick="selectService('${s.id}')">
+      <div class="svc-check">✓</div>
+      <div class="svc-name">${s.name}</div>
+      <div class="svc-meta">${s.desc} · ${s.duration} min</div>
+      <div class="svc-price">₹${s.price.toLocaleString()}</div>
+    </div>`).join('');
+}
+function filterCategory(cat,btn){
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderServices(cat);
+}
+function selectService(id){
+  state.service=SERVICES.find(s=>s.id===id);
+  state.stylist=null;
+  renderServices(document.querySelector('.cat-tab.active').textContent.toLowerCase().trim()==='all'?'all':state.service.cat);
+}
+
+// ── Stylists ──
+function renderStylists(){
+  const g=document.getElementById('stylistsGrid');
+  const list=state.service?STYLISTS.filter(st=>st.cats.includes(state.service.cat)):STYLISTS;
+  g.innerHTML=list.map(s=>`
+    <div class="stylist-card${state.stylist&&state.stylist.id===s.id?' selected':''}" onclick="selectStylist('${s.id}')">
+      <div class="stylist-avatar">${s.name.charAt(0)}</div>
+      <div class="stylist-name">${s.name}</div>
+      <div class="stylist-role">${s.role}</div>
+      <div class="stylist-badge">${s.speciality}</div>
+    </div>`).join('');
+}
+function selectStylist(id){
+  state.stylist=STYLISTS.find(s=>s.id===id);
+  document.querySelectorAll('.stylist-card').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+// ── Calendar ──
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonth').textContent=months[calDate.getMonth()]+' '+calDate.getFullYear();
+  const grid=document.getElementById('calGrid');
+  const today=new Date(); today.setHours(0,0,0,0);
+  const first=new Date(calDate.getFullYear(),calDate.getMonth(),1);
+  const last=new Date(calDate.getFullYear(),calDate.getMonth()+1,0);
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html=days.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+  for(let i=0;i<first.getDay();i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(calDate.getFullYear(),calDate.getMonth(),d);
+    const isSunday=dt.getDay()===0;
+    const isPast=dt<today;
+    const isSelected=state.date&&state.date.toDateString()===dt.toDateString();
+    const isToday=dt.toDateString()===today.toDateString();
+    const cls=['cal-day',isToday?'today':'',isPast||isSunday?'disabled':'',isSelected?'selected':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="${!isPast&&!isSunday?`selectDate(${calDate.getFullYear()},${calDate.getMonth()},${d})`:''}"> ${d}</div>`;
+  }
+  grid.innerHTML=html;
+  renderSlots();
+}
+function changeMonth(dir){
+  calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);
+  renderCalendar();
+}
+function selectDate(y,m,d){
+  state.date=new Date(y,m,d);
+  state.time=null;
+  renderCalendar();
+}
+function renderSlots(){
+  const sg=document.getElementById('slotsGrid');
+  const msg=document.getElementById('noSlotMsg');
+  if(!state.date){sg.innerHTML='';msg.style.display='';return;}
+  msg.style.display='none';
+  sg.innerHTML=TIMES.map(t=>{
+    const taken=TAKEN.includes(t);
+    const sel=state.time===t;
+    return `<div class="slot${taken?' taken':sel?' selected':''}" onclick="${!taken?`selectSlot('${t}')`:''}"> ${t}</div>`;
+  }).join('');
+}
+function selectSlot(t){
+  state.time=t;
+  renderSlots();
+}
+
+// ── Summary ──
+function renderSummary(){
+  const svc=state.service;
+  const sty=state.stylist;
+  const dateStr=state.date?state.date.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}):'—';
+  document.getElementById('summaryCard').innerHTML=`
+    <div class="summary-row"><span class="summary-label">Service</span><span class="summary-val">${svc.name}</span></div>
+    <div class="summary-row"><span class="summary-label">Stylist</span><span class="summary-val">${sty.name} · ${sty.role}</span></div>
+    <div class="summary-row"><span class="summary-label">Date</span><span class="summary-val">${dateStr}</span></div>
+    <div class="summary-row"><span class="summary-label">Time</span><span class="summary-val">${state.time}</span></div>
+    <div class="summary-row"><span class="summary-label">Duration</span><span class="summary-val">${svc.duration} minutes</span></div>
+    <div class="summary-row"><span class="summary-label">Client</span><span class="summary-val">${state.name} · ${state.phone}</span></div>
+    <div class="summary-row"><span class="summary-label">Total</span><span class="summary-val summary-total">₹${svc.price.toLocaleString()}</span></div>
+  `;
+}
+function selectPayment(type){
+  state.payment=type;
+  document.getElementById('payAtSalon').classList.toggle('selected',type==='salon');
+  document.getElementById('payOnline').classList.toggle('selected',type==='online');
+  document.getElementById('onlinePayBtns').style.display=type==='online'?'block':'none';
+  document.getElementById('confirmBtn').style.display=type==='salon'?'block':'none';
+}
+function payWithRazorpay(){
+  showToast('Razorpay integration placeholder — add your key_id to go live','');
+  setTimeout(()=>confirmBooking(),1500);
+}
+function payWithStripe(){
+  showToast('Stripe integration placeholder — add your publishable key to go live','');
+  setTimeout(()=>confirmBooking(),1500);
+}
+
+// ── Confirm ──
+function confirmBooking(){
+  state.ref='SS-'+Math.floor(100000+Math.random()*900000);
+  const booking={
+    ref:state.ref,
+    name:state.name,phone:state.phone,email:state.email,notes:state.notes,
+    service:state.service.name,price:state.service.price,duration:state.service.duration,
+    stylist:state.stylist.name,
+    date:state.date.toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'}),
+    rawDate:state.date.toISOString(),
+    time:state.time,
+    payment:state.payment,
+    status:'pending',
+    createdAt:new Date().toISOString()
+  };
+  bookings.unshift(booking);
+  localStorage.setItem('starBookings',JSON.stringify(bookings));
+  showSuccess(booking);
+}
+function showSuccess(b){
+  ['step1','step2','step3','step4','step5'].forEach(s=>document.getElementById(s).classList.add('hidden'));
+  document.getElementById('progressBar').classList.add('hidden');
+  document.getElementById('stepNav').classList.add('hidden');
+  document.getElementById('stepSuccess').classList.remove('hidden');
+  document.getElementById('bookingRef').textContent=b.ref;
+  document.getElementById('emailPreview').innerHTML=`
+    <h4>Confirmation message (sent to ${b.email})</h4>
+    <p style="color:var(--text);margin-bottom:.5rem;">Dear <strong>${b.name}</strong>,</p>
+    <p style="color:var(--muted);font-size:.83rem;line-height:1.8;">
+      Your appointment at <strong style="color:var(--gold);">Star Saloon</strong> has been confirmed.<br>
+      <strong>Ref:</strong> ${b.ref} &nbsp;|&nbsp; <strong>Service:</strong> ${b.service}<br>
+      <strong>Stylist:</strong> ${b.stylist} &nbsp;|&nbsp; <strong>Date:</strong> ${b.date} at ${b.time}<br>
+      <strong>Total:</strong> ₹${b.price.toLocaleString()} — ${b.payment==='salon'?'Pay at salon':'Paid online'}<br><br>
+      We look forward to seeing you! Call us at +91 98400 00001 if you need to reschedule.
+    </p>
+    <p style="color:var(--gold-dim);font-size:.78rem;margin-top:.8rem;">★ Star Saloon · Chennai · starSaloon.in</p>
+  `;
+  showToast('Booking confirmed! '+b.ref,'success');
+}
+
+// ═══════════════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════════════
+function showAdminLogin(){
+  document.getElementById('adminOverlay').classList.remove('hidden');
+  document.getElementById('adminLogin').style.display='flex';
+  document.getElementById('adminDashboard').classList.add('hidden');
+  document.getElementById('adminPw').value='';
+  document.getElementById('pwError').classList.add('hidden');
+}
+function hideAdmin(){
+  document.getElementById('adminOverlay').classList.add('hidden');
+}
+function checkAdmin(){
+  if(document.getElementById('adminPw').value===ADMIN_PASSWORD){
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    document.getElementById('adminDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    renderAdmin();
+  } else {
+    document.getElementById('pwError').classList.remove('hidden');
+    document.getElementById('adminPw').value='';
+  }
+}
+function renderAdmin(){
+  const sf=document.getElementById('statusFilter').value;
+  const df=document.getElementById('dateFilter').value;
+  const today=new Date().toDateString();
+  const weekAgo=new Date(Date.now()-7*24*60*60*1000);
+  let list=[...bookings];
+  if(sf!=='all') list=list.filter(b=>b.status===sf);
+  if(df==='today') list=list.filter(b=>new Date(b.rawDate).toDateString()===today);
+  if(df==='week') list=list.filter(b=>new Date(b.rawDate)>=weekAgo);
+
+  // Stats
+  const stats=[
+    {num:bookings.length,lbl:'Total Bookings'},
+    {num:bookings.filter(b=>b.status==='pending').length,lbl:'Pending'},
+    {num:bookings.filter(b=>b.status==='confirmed').length,lbl:'Confirmed'},
+    {num:'₹'+bookings.reduce((a,b)=>a+(b.status!=='cancelled'?b.price:0),0).toLocaleString(),lbl:'Revenue'},
+  ];
+  document.getElementById('adminStats').innerHTML=stats.map(s=>`
+    <div class="stat-card"><div class="stat-num">${s.num}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('');
+
+  const tbody=document.getElementById('bookingsBody');
+  const noMsg=document.getElementById('noBookingsMsg');
+  if(!list.length){tbody.innerHTML='';noMsg.style.display='';return;}
+  noMsg.style.display='none';
+  tbody.innerHTML=list.map(b=>`
+    <tr>
+      <td style="color:var(--gold);font-family:monospace;">${b.ref}</td>
+      <td><div style="font-weight:500;">${b.name}</div><div style="font-size:.75rem;color:var(--muted);">${b.phone}</div></td>
+      <td><div>${b.service}</div><div style="font-size:.75rem;color:var(--muted);">₹${b.price.toLocaleString()}</div></td>
+      <td>${b.stylist}</td>
+      <td><div>${b.date}</div><div style="font-size:.75rem;color:var(--muted);">${b.time}</div></td>
+      <td><span style="font-size:.75rem;color:${b.payment==='online'?'var(--info)':'var(--muted)'};">${b.payment==='online'?'Online':'At salon'}</span></td>
+      <td><span class="status-badge status-${b.status}">${b.status}</span></td>
+      <td>
+        <div class="action-btns">
+          ${b.status!=='confirmed'?`<button class="btn btn-success btn-sm" onclick="adminAction('${b.ref}','confirmed')">Confirm</button>`:''}
+          ${b.status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="adminAction('${b.ref}','cancelled')">Cancel</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="openReschedule('${b.ref}')">Reschedule</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function adminAction(ref,action){
+  const b=bookings.find(x=>x.ref===ref);
+  if(b){b.status=action;localStorage.setItem('starBookings',JSON.stringify(bookings));renderAdmin();showToast(`Booking ${ref} ${action}`,'success');}
+}
+function openReschedule(ref){
+  document.getElementById('rescheduleRef').value=ref;
+  document.getElementById('rescheduleModal').classList.remove('hidden');
+}
+function applyReschedule(){
+  const ref=document.getElementById('rescheduleRef').value;
+  const date=document.getElementById('newDate').value;
+  const time=document.getElementById('newTime').value;
+  if(!date){showToast('Please pick a new date','error');return;}
+  const b=bookings.find(x=>x.ref===ref);
+  if(b){
+    b.date=new Date(date).toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+    b.rawDate=new Date(date).toISOString();
+    b.time=time;
+    b.status='rescheduled';
+    localStorage.setItem('starBookings',JSON.stringify(bookings));
+    renderAdmin();
+    document.getElementById('rescheduleModal').classList.add('hidden');
+    showToast('Booking rescheduled: '+ref,'success');
+  }
+}
+function showHome(){
+  if(!document.getElementById('adminOverlay').classList.contains('hidden')) hideAdmin();
+  if(!document.getElementById('bookingModal').classList.contains('hidden')) closeBooking();
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+function showToast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast'+(type?' '+type:'');
+  t.innerHTML=`<span style="font-size:1rem;">${type==='success'?'✓':type==='error'?'✕':'ℹ'}</span> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400);},3500);
+}
+
+// Load sample data if empty
+if(!bookings.length){
+  bookings=[
+    {ref:'SS-123456',name:'Priya Sharma',phone:'+91 98400 11111',email:'priya@email.com',notes:'',service:'Classic Haircut',price:350,duration:45,stylist:'Ananya Raj',date:'Mon, 17 Mar 2025',rawDate:new Date().toISOString(),time:'10:00 AM',payment:'salon',status:'pending',createdAt:new Date().toISOString()},
+    {ref:'SS-789012',name:'Arjun Kumar',phone:'+91 98400 22222',email:'arjun@email.com',notes:'Prefer hot towel',service:'Hot Towel Shave',price:300,duration:30,stylist:'Karthik M',date:'Mon, 17 Mar 2025',rawDate:new Date().toISOString(),time:'11:30 AM',payment:'online',status:'confirmed',createdAt:new Date().toISOString()},
+    {ref:'SS-345678',name:'Meena Iyer',phone:'+91 98400 33333',email:'meena@email.com',notes:'',service:'Gold Facial',price:1100,duration:75,stylist:'Divya S',date:'Tue, 18 Mar 2025',rawDate:new Date(Date.now()+86400000).toISOString(),time:'02:00 PM',payment:'salon',status:'pending',createdAt:new Date().toISOString()},
+  ];
+  localStorage.setItem('starBookings',JSON.stringify(bookings));
+}
+</script>
+</body>
+</html>
